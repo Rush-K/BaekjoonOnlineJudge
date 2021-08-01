@@ -48,7 +48,7 @@ public class P1644 {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         int N = scanner.nextInt();
-        int[] primeNumbers = arrayOfPrimeNumber(N);
+        int[] primeNumbers = arrayOfPrimeNumber(N); // 소수들 받아오기
         boolean[] visited = new boolean[primeNumbers.length];
 
         for (int i = 1; i <= primeNumbers.length; i++) {
