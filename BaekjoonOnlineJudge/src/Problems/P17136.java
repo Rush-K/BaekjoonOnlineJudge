@@ -1,22 +1,19 @@
+/** Baekjoon Online Judge
+ *   Problem No. 17136
+ *   색종이 붙이기
+ *   Writed by Rush.K
+ *   Using DFS Method
+ */
+
 package Problems;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Scanner;
-class Case {
-	int[][] map;
-	int[] squareCount;
-	
-	public Case(int[][] _map, int[] _squareCount) {
-		map = new int[_map.length][_map.length];
-		for (int i = 0; i < _map.length; i++) map[i] = Arrays.copyOf(_map[i], _map[i].length);
-		squareCount = new int[_squareCount.length];
-		squareCount = Arrays.copyOf(_squareCount, _squareCount.length);
-	}
-}
+
 public class P17136 {
-	public static boolean isClearMap(int[][] map) {
+	public static int answer = Integer.MAX_VALUE; // 답
+	public static int[] squareCount = new int[6]; // 종류별 색종이 갯수
+
+	public static boolean isClearMap(int[][] map) { // 전부 색종이로 덮었는가?
 		for (int i = 0; i < map.length; i++) {
 			for (int j = 0; j < map.length; j++) {
 				if (map[i][j] == 1) return false;
@@ -24,7 +21,7 @@ public class P17136 {
 		}
 		return true;
 	}
-	public static boolean findSquare(int[][] map, int squareLength, int x, int y) {
+	public static boolean findSquare(int[][] map, int squareLength, int x, int y) { // 색종이를 붙일 수 있는가?
 		for (int i = x; i < x + squareLength; i++) {
 			for (int j = y; j < y + squareLength; j++) {
 				if (map[i][j] == 0) return false;
@@ -33,64 +30,56 @@ public class P17136 {
 		return true;
 	}
 	
-	public static void updateMap(int[][] map, int squareLength, int x, int y) {
+	public static void updateMap(int[][] map, int squareLength, int x, int y, int value) { // value : 0 -> 색종이 붙이기, 1 -> 색종이 떼기
 		for (int i = x; i < x + squareLength; i++) {
 			for (int j = y; j < y + squareLength; j++) {
-				map[i][j] = 0;
+				map[i][j] = value;
 			}
 		}
 	}
-	
+
+	public static void dfs(int[][] map, int x, int y, int count) { // DFS 알고리즘
+		if (count >= answer) return; // 최소 개수보다 많으면 탐색할 필요 없음
+
+		if (x == map.length) { // 전체를 탐색 완료 했을 경우
+			if (isClearMap(map)) answer = Math.min(answer, count); // 색종이로 알맞게 덮은 경우
+			return;
+		}
+
+		if (y >= map.length) { // 좌표 y가 map을 벗어난 경우
+			dfs(map, x + 1, 0, count);
+			return;
+		}
+
+		if (map[x][y] == 1) {
+			for (int k = 5; k >= 1; k--) { // 5x5 ~ 1x1 색종이를 붙여봄
+				if (x + k - 1 >= map.length || y + k - 1 >= map.length) continue; // 색종이를 붙일 수 없는 경우
+				if (findSquare(map, k, x, y) && squareCount[k] < 5) { // 색종이를 붙이는 경우
+					updateMap(map, k, x, y, 0);
+					squareCount[k]++;
+					dfs(map, x, y + k, count + 1);
+					squareCount[k]--;
+					updateMap(map, k, x, y, 1);
+				}
+			}
+		} else {
+			dfs(map, x, y + 1, count);
+		}
+	}
+
 	public static void main(String[] args) {
 		Scanner scanner = new Scanner(System.in);
-		Queue<Case> queue = new LinkedList<>();
-		
-		int answer = Integer.MAX_VALUE;
-		int[] squareCount = new int[6];
+
 		int[][] map = new int[10][10];
-		
 		for (int i = 0; i < map.length; i++) {
 			for (int j = 0; j < map.length; j++) {
 				map[i][j] = scanner.nextInt();
 			}
 		}
-		
-		Case T = new Case(map, squareCount);
-		Case tempT;
-		
-		queue.add(T);
-		
-		while (!queue.isEmpty()) {
-			T = queue.poll();
-			
-			int ans = 0;
-			for (int s : T.squareCount) ans += s;
-			
-			if (ans > answer) continue;
-			
-			if (isClearMap(T.map)) {
-				answer = Math.min(answer, ans);
-				break;
-			}
-			
-			for (int j = 0; j < T.map.length; j++) {
-				for (int k = 0; k <= T.map.length; k++) {
-					for (int i = 5; i >= 1; i--) {
-						if (T.squareCount[i] >= 5) continue;
-						if (j + i - 1 >= T.map.length || k + i - 1 >= T.map.length) continue;
-						if (findSquare(T.map, i, j, k)) {
-							tempT = new Case(T.map, T.squareCount);
-							updateMap(tempT.map, i, j, k);
-							tempT.squareCount[i]++;
-							queue.add(tempT);
-						}
-					}
 
-				}
-			}	
-		}
+		dfs(map, 0, 0, 0);
 		
-		if (answer == Integer.MAX_VALUE) System.out.println("-1");
+		if (answer == Integer.MAX_VALUE) System.out.println("-1"); // 답이 없는 경우
 		else System.out.println(answer);
 	}
 }
