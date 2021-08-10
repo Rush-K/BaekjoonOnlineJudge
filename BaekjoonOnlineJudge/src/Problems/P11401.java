@@ -25,6 +25,8 @@ import java.io.InputStreamReader;
  *
  * + TIP
  *  - 1000000007 은 10억 이상의 가장 작은 소수
+ *
+ *  Reference : https://st-lab.tistory.com/241
  */
 
 public class P11401 {
